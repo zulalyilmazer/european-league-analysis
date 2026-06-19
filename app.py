@@ -7,10 +7,8 @@ import datetime
 st.set_page_config(page_title="European Leagues Live Scores", layout="wide")
 st.title("⚽ European Major Leagues - Live Score Panel")
 
-@st.fragment(run_every=15)
-def live_score_stream():
+def get_live_scores():
     url = "https://v3.football.api-sports.io/fixtures"
-
     raw_key = "0f006a6e45f9c3502c156a1c08bfe68b"
     clean_key = str(raw_key).strip().encode('utf-8').decode('latin-1')
 
@@ -26,47 +24,40 @@ def live_score_stream():
         response = requests.get(url, headers=headers, params=query_params)
         data = response.json()
 
-        european_leagues = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie"]
         match_list = []
-        all_other_matches = []
 
         for item in data.get('response', []):
-            league_name = str(item['league']['name'])
-
             home_goals = item['goals']['home'] if item['goals']['home'] is not None else 0
             away_goals = item['goals']['away'] if item['goals']['away'] is not None else 0
             elapsed_time = f"{item['fixture']['status']['elapsed']}'" if item['fixture']['status']['elapsed'] else "Not Started"
 
-            match_data = {
-                "league": league_name,
-                "country": str(item['league']['country']),
-                "home_team": str(item['teams']['home']['name']),
-                "away_team": str(item['teams']['away']['name']),
-                "score": f"{home_goals} - {away_goals}",
-                "elapsed_time": str(elapsed_time)
-            }
+            match_list.append({
+                "Lig": str(item['league']['name']),
+                "Ülke": str(item['league']['country']),
+                "Ev Sahibi": str(item['teams']['home']['name']),
+                "Deplasman": str(item['teams']['away']['name']),
+                "Skor": f"{home_goals} - {away_goals}",
+                "Süre / Durum": str(elapsed_time)
+            })
 
-            if league_name in european_leagues:
-                match_list.append(match_data)
-            else:
-                all_other_matches.append(match_data)
-
-        if match_list:
-            df = pd.DataFrame(match_list)
-            st.subheader("🔥 Live & Upcoming Major European Matches")
-            st.metric(label="Total Major Matches Today", value=len(df))
-            st.dataframe(df, use_container_width=True, hide_index=True)
-        else:
-            st.info("There are no matches scheduled or playing in the selected Major European leagues today.")
-            if all_other_matches:
-                st.write("---")
-                st.subheader("🌍 Sample Live / Today's Matches Across Global Leagues (Demo Mode)")
-                df_fallback = pd.DataFrame(all_other_matches[:10])
-                st.dataframe(df_fallback, use_container_width=True, hide_index=True)
+        return match_list
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"API Error: {e}")
+        return []
 
-    st.caption(f"Last Updated At: {time.strftime('%H:%M:%S')}")
+# Verileri çek ve listele
+match_list = get_live_scores()
 
-live_score_stream()
+if match_list:
+    df = pd.DataFrame(match_list)
+    st.subheader("🔥 Today's Live & Upcoming Football Matches Across Leagues")
+    st.metric(label="Total Matches Today", value=len(df))
+    st.dataframe(df, use_container_width=True, hide_index=True)
+else:
+    st.info("There are no matches scheduled or playing right now.")
+
+st.caption(f"Last Updated At: {time.strftime('%H:%M:%S')}")
+
+if st.button("🔄 Refresh Scores"):
+    st.rerun()
