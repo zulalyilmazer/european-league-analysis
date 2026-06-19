@@ -119,9 +119,8 @@ for item in data['response']:
 
 
 
-!npm install -g localtunnel
+
 
 import urllib
 print("Sitenizin Giriş Şifresi (Tunnel Password):", urllib.request.urlopen('https://ipv4.icanhazip.com').read().decode('utf-8').strip())
 
-!streamlit run app.py & npx localtunnel --port 8501
