@@ -117,7 +117,7 @@ for item in data['response']:
 # 
 # live_score_stream()
 
-!streamlit run app.py
+
 
 !npm install -g localtunnel
 
