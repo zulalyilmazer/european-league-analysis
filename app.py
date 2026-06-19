@@ -39,7 +39,7 @@ for item in data['response']:
 
 
 
-!pip install streamlit requests pandas
+
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%writefile app.py
