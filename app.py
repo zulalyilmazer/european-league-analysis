@@ -37,7 +37,7 @@ for item in data['response']:
   df = pd.DataFrame(live_matches)
   print(df.head())
 
-pip install --upgrade streamlit
+
 
 !pip install streamlit requests pandas
 
